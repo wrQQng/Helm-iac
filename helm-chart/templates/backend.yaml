@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-backend
+  labels:
+    app: {{ .Release.Name }}-backend
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-backend
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-backend
+    spec:
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.image }}:{{ .Values.backend.tag }}"
+          ports:
+            - containerPort: {{ .Values.backend.containerPort }}
+          env:
+            - name: DB_HOST
+              value: "{{ .Values.postgres.host }}"
+            - name: DB_PORT
+              value: "{{ .Values.postgres.port }}"
+            - name: DB_NAME
+              value: "{{ .Values.postgres.dbName }}"
+            - name: DB_USER
+              value: "{{ .Values.postgres.user }}"
+            - name: DB_PASSWORD
+              value: "{{ .Values.postgres.password }}"
+          resources:
+            requests:
+              memory: {{ .Values.backend.resources.requests.memory }}
+              cpu: {{ .Values.backend.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.backend.resources.limits.memory }}
+              cpu: {{ .Values.backend.resources.limits.cpu }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.backend.probes.startupProbe.httpGet.path }}
+              port: {{ .Values.backend.probes.startupProbe.httpGet.port }}
+            failureThreshold: {{ .Values.backend.probes.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.backend.probes.startupProbe.periodSeconds }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.backend.probes.livenessProbe.httpGet.path }}
+              port: {{ .Values.backend.probes.livenessProbe.httpGet.port }}
+            periodSeconds: {{ .Values.backend.probes.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.backend.probes.livenessProbe.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.backend.probes.readinessProbe.httpGet.path }}
+              port: {{ .Values.backend.probes.readinessProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.backend.probes.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.backend.probes.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.backend.probes.readinessProbe.failureThreshold }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Release.Name }}-backend
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: {{ .Values.backend.containerPort }}

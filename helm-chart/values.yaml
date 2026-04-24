@@ -1,0 +1,70 @@
+backend:
+  image: wrqng/notes-app-backend
+  tag: v1.7
+  containerPort: 3000
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "500m"
+    limits:
+      memory: "256Mi"
+      cpu: "1"
+  probes:
+    startupProbe:
+      httpGet:
+        path: /health
+        port: 3000
+      failureThreshold: 30
+      periodSeconds: 2
+    livenessProbe:
+      httpGet:
+        path: /health
+        port: 3000
+      periodSeconds: 10
+      failureThreshold: 3
+    readinessProbe:
+      httpGet:
+        path: /health
+        port: 3000
+      initialDelaySeconds: 0
+      periodSeconds: 5
+      failureThreshold: 3
+
+frontend:
+  image: wrqng/notes-app-frontend
+  tag: v1.5
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "250m"
+    limits:
+      memory: "128Mi"
+      cpu: "500m"
+  probes:
+    liveness:
+      path: /
+      port: 80
+      periodSeconds: 10
+      failureThreshold: 3
+    readiness:
+      path: /
+      port: 80
+      periodSeconds: 5
+      failureThreshold: 3
+
+ingress:
+  className: alb
+  scheme: internet-facing
+  targetType: ip
+
+hpa:
+  minReplicas: 1
+  maxReplicas: 5
+  CPUUtilization: 50
+
+postgres:
+  host: "staging-postgres.cls2i8wkkxa4.eu-central-1.rds.amazonaws.com"
+  port: 5432
+  dbName: mydb
+  user: appuser
+  password: "very_secure_password"
