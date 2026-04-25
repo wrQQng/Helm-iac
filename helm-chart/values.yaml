@@ -1,5 +1,5 @@
 backend:
-  image: wrqng/notes-app-backend
+  image: wrqng/staging-todo-app-backend
   tag: 346d1a84e9a22d40e48c03bce207f8e6d7a3b20c
   containerPort: 3000
   resources:
@@ -30,7 +30,7 @@ backend:
       periodSeconds: 5
       failureThreshold: 3
 frontend:
-  image: wrqng/notes-app-frontend
+  image: wrqng/staging-todo-app-frontend
   tag: 346d1a84e9a22d40e48c03bce207f8e6d7a3b20c
   resources:
     requests:
