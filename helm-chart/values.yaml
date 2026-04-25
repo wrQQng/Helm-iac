@@ -1,6 +1,6 @@
 backend:
   image: wrqng/notes-app-backend
-  tag: v1.7
+  tag: 346d1a84e9a22d40e48c03bce207f8e6d7a3b20c
   containerPort: 3000
   resources:
     requests:
@@ -29,10 +29,9 @@ backend:
       initialDelaySeconds: 0
       periodSeconds: 5
       failureThreshold: 3
-
 frontend:
   image: wrqng/notes-app-frontend
-  tag: v1.5
+  tag: 346d1a84e9a22d40e48c03bce207f8e6d7a3b20c
   resources:
     requests:
       memory: "64Mi"
@@ -51,17 +50,14 @@ frontend:
       port: 80
       periodSeconds: 5
       failureThreshold: 3
-
 ingress:
   className: alb
   scheme: internet-facing
   targetType: ip
-
 hpa:
   minReplicas: 1
   maxReplicas: 5
   CPUUtilization: 50
-
 postgres:
   host: "staging-postgres.cls2i8wkkxa4.eu-central-1.rds.amazonaws.com"
   port: 5432
