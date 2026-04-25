@@ -1,6 +1,6 @@
 backend:
   image: 882437029224.dkr.ecr.eu-central-1.amazonaws.com/staging-todo-app-backend
-  tag: 346d1a84e9a22d40e48c03bce207f8e6d7a3b20c
+  tag: 056b82bcac170d2926046f75e636e0e5678e44f4
   containerPort: 3000
   resources:
     requests:
@@ -31,7 +31,7 @@ backend:
       failureThreshold: 3
 frontend:
   image: 882437029224.dkr.ecr.eu-central-1.amazonaws.com/staging-todo-app-frontend
-  tag: 346d1a84e9a22d40e48c03bce207f8e6d7a3b20c
+  tag: 056b82bcac170d2926046f75e636e0e5678e44f4
   resources:
     requests:
       memory: "64Mi"
