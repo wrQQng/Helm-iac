@@ -1,0 +1,178 @@
+# 🚀 Cloud-Native Pet Project — Full DevOps Stack Showcase
+
+> A hands-on demonstration of modern DevOps practices using AWS, Kubernetes, Helm, ArgoCD, GitHub Actions, Docker, and observability tooling — all wired together in a real, deployable setup.
+
+---
+
+## 🧰 Tech Stack
+
+| Category | Tools |
+|---|---|
+| ☁️ Cloud Infrastructure | AWS — VPC, ECR, RDS, EKS |
+| 🐳 Containerization | Docker |
+| ⚙️ Orchestration | Kubernetes |
+| 📦 Package Management | Helm |
+| 🔄 GitOps / CD | ArgoCD |
+| 🏗️ CI/CD | GitHub Actions |
+| 📊 Observability | Prometheus + Grafana |
+| 🏛️ Infrastructure as Code | Terraform |
+
+---
+
+## 🗺️ Architecture Overview
+
+```
+GitHub (appgit + helm-iac)
+        │
+        ▼
+GitHub Actions (CI) ──► Docker Build ──► Push to ECR
+        │
+        ▼
+Updates helm-iac repo (CD trigger)
+        │
+        ▼
+ArgoCD watches helm-iac ──► Syncs Helm chart to EKS
+        │
+        ▼
+EKS Cluster (VPC)
+  ├── App Pods (Frontend + Backend)
+  ├── RDS (PostgreSQL)
+  └── Prometheus + Grafana
+```
+
+---
+
+## 📁 Repository Structure
+
+This project is split across two repositories:
+
+| Repo | Purpose |
+|---|---|
+| `appgit` | Application source code + GitHub Actions CI/CD workflows |
+| `helm-iac` | Helm charts + Terraform infrastructure + ArgoCD manifests |
+
+---
+
+## 🛠️ Deployment Guide
+
+### Step 1 — Create S3 Bucket for Terraform Backend
+
+```bash
+terraform apply -f /helm-iac/Iac/set-up/0-s3-for-backend.tf
+```
+
+This provisions an S3 bucket used to store the Terraform remote state.
+
+---
+
+### Step 2 — Provision AWS Infrastructure
+
+```bash
+terraform apply -f /helm-iac/Iac/.
+```
+
+> ⏳ This step takes approximately **15 minutes**.
+
+After completion, Terraform outputs will provide:
+- 🔗 **2 ECR repository URLs** (frontend + backend)
+- 🗄️ **RDS endpoint**
+- ⌨️ **kubectl configuration command**
+
+---
+
+### Step 3 — Update Helm Values
+
+Open `/helm-iac/helm-chart/values.yml` and replace the RDS endpoint placeholder with the value from the Terraform output:
+
+```yaml
+database:
+  host: <your-rds-endpoint-here>
+```
+
+---
+
+### Step 4 — Set Up GitHub Repositories
+
+1. Create two GitHub repositories — one for `appgit`, one for `helm-iac`
+2. Upload the respective folders to each repo
+3. Add the following **repository secrets** to the `appgit` repo:
+
+| Secret | Description |
+|---|---|
+| `AWS_ACCESS_KEY_ID` | AWS credentials |
+| `AWS_SECRET_ACCESS_KEY` | AWS credentials |
+| `ECR_REPO_BACKEND` | ECR URI for the backend image |
+| `ECR_REPO_FRONTEND` | ECR URI for the frontend image |
+| `INFRA_REPO_TOKEN` | Personal Access Token for `helm-iac` repo *(Settings → Developer Settings → Personal Access Tokens)* |
+
+---
+
+### Step 5 — Update Configuration References
+
+In `helm-iac/argocd/app.yaml`, set your `helm-iac` repository URL:
+
+```yaml
+spec:
+  source:
+    repoURL: https://github.com/<your-username>/helm-iac
+```
+
+In `appgit/.github/workflows/CI-CD.yml`, update the repo references to point to your own repositories.
+
+---
+
+### Step 6 — Connect to the Cluster & Deploy ArgoCD App
+
+Configure `kubectl` using the command from the Terraform output, then apply the ArgoCD manifest:
+
+```bash
+kubectl apply -f /helm-iac/argocd/app.yaml
+```
+
+✅ ArgoCD will automatically detect the Helm chart in your `helm-iac` repo and sync the full application to the EKS cluster.
+
+---
+
+## 🔄 CI/CD Flow
+
+```
+Code push to appgit
+        │
+        ▼
+GitHub Actions triggers:
+  1. Build Docker images
+  2. Push to ECR
+  3. Update image tags in helm-iac repo
+        │
+        ▼
+ArgoCD detects changes in helm-iac
+        │
+        ▼
+ArgoCD syncs new Helm release to EKS
+        │
+        ▼
+Application updated with zero manual steps
+```
+
+---
+
+## 📊 Observability
+
+Prometheus and Grafana are deployed into the cluster and configured to scrape metrics from the application pods, giving you real-time dashboards for:
+
+- Pod health and resource usage
+- Request rates and latency
+- RDS connection metrics
+
+---
+
+## ⚠️ Security Note
+
+> For simplicity, secrets in this project are passed directly as Kubernetes secrets or environment variables.
+> In a production environment, **all secrets should be managed via AWS Secrets Manager** and injected at runtime using tools like the [AWS Secrets and Configuration Provider (ASCP)](https://docs.aws.amazon.com/secretsmanager/latest/userguide/integrating_csi_driver.html).
+
+---
+
+## 💡 Purpose
+
+This project demonstrates how to wire together the full modern DevOps toolchain in a single, cohesive setup — from infrastructure provisioning all the way to automated deployments and observability. It's intentionally built to be transparent, reproducible, and easy to walk through.

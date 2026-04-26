@@ -1,6 +1,6 @@
 backend:
-  image: 882437029224.dkr.ecr.eu-central-1.amazonaws.com/staging-todo-app-backend
-  tag: 056b82bcac170d2926046f75e636e0e5678e44f4
+  image: <amazonID>.dkr.ecr.eu-central-1.amazonaws.com/staging-todo-app-backend
+  tag: <It will automatically use the latest image tag from ECR>
   containerPort: 3000
   resources:
     requests:
@@ -30,8 +30,8 @@ backend:
       periodSeconds: 5
       failureThreshold: 3
 frontend:
-  image: 882437029224.dkr.ecr.eu-central-1.amazonaws.com/staging-todo-app-frontend
-  tag: 056b82bcac170d2926046f75e636e0e5678e44f4
+  image: <amazonID>.dkr.ecr.eu-central-1.amazonaws.com/staging-todo-app-frontend
+  tag: <It will automatically use the latest image tag from ECR>
   resources:
     requests:
       memory: "64Mi"
@@ -59,7 +59,7 @@ hpa:
   maxReplicas: 5
   CPUUtilization: 50
 postgres:
-  host: "staging-postgres.cls2i8wkkxa4.eu-central-1.rds.amazonaws.com"
+  host: "<put_your_db_host_here>"
   port: 5432
   dbName: mydb
   user: appuser
